@@ -1,5 +1,6 @@
 import requests
 import gradio as gr
+from fastapi import FastAPI
 
 OLLAMA_URL = "http://localhost:11434/api/generate"
 
@@ -24,16 +25,22 @@ def summarize_text(text):
         return f"Error occurred {response.text}"
 
 
-if __name__ == '__main__':
-    summary = summarize_text(
-        """
-        DeepSeek AI is an innovative platform designed to revolutionize the way businesses analyze large datasets.
-        By utilizing advanced machine learning algorithms and natural language processing,
-        it can quickly extract valuable insights from complex and unstructured data sources.
-        This allows companies to make more informed decisions, predict future trends, and improve their overall 
-        operational efficiency. DeepSeek AI's user-friendly interface and powerful analytical capabilities make it 
-        an indispensable tool for industries ranging from finance to healthcare, helping businesses stay ahead in 
-        a competitive market.
-        """)
+# Using gradio interface
+interface = gr.Interface(
+    fn=summarize_text,
+    inputs=gr.Textbox(lines=10, placeholder="Enter text to summarize"),
+    outputs=gr.Textbox(label="Summarized text"),
+    title="AI Powered Text Summarizer",
+    description="Enter a long text and the AI will generate a concise summary"
+)
+interface.launch()
 
-    print(summary)
+# Using FasAPI
+app = FastAPI()
+
+
+@app.post("/summarize/")
+def summarize_text_api(text: str):
+    return summarize_text(text)
+
+# Run with: uvicorn app:app --reload
